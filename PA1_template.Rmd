@@ -4,7 +4,7 @@ This document contains the solution to the Peer Assessment 1 of Reproducible Res
 
 ## Loading and preprocessing the data
 
-Here's the code to read the csc file containinjg the activity data:
+Here's the code to read the csv file containinjg the activity data:
 ```{r}
 activityData <- read.csv("C:/Users/GALAXY COMPUTERS/RepData_PeerAssessment1/activity/activity.csv")
 ```
@@ -128,7 +128,7 @@ activityCleanSummary$date <- row.names(activityCleanSummary)
 
 Now, let's plot the histogram of the steps taken using the cleaned data and find the mean and median.
 
-```{r,fig.align='center',fig.height=7,fig.width=6}
+```{r,fig.height=7,fig.width=6,fig.align='center'}
 ##plotting the histogram
 hist(activityCleanSummary$TotalStepsTaken,xlab="Steps taken each day",main="Histogram of Steps taken each day",col="blue")
 

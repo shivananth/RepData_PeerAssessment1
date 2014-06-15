@@ -4,7 +4,7 @@ This document contains the solution to the Peer Assessment 1 of Reproducible Res
 
 ## Loading and preprocessing the data
 
-Here's the code to read the csc file containinjg the activity data:
+Here's the code to read the csv file containinjg the activity data:
 
 ```r
 activityData <- read.csv("C:/Users/GALAXY COMPUTERS/RepData_PeerAssessment1/activity/activity.csv")
