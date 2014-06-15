@@ -5,11 +5,13 @@ This document contains the solution to the Peer Assessment 1 of Reproducible Res
 ## Loading and preprocessing the data
 
 Here's the code to read the csc file containinjg the activity data:
-```{r}
+
+```r
 activityData <- read.csv("C:/Users/GALAXY COMPUTERS/RepData_PeerAssessment1/activity/activity.csv")
 ```
 Since the date variable is not of "date" type, let's coerce it.
-```{r}
+
+```r
 activityData$dateEdt <- as.Date(as.character(activityData$date))
 ```
 
@@ -17,7 +19,8 @@ activityData$dateEdt <- as.Date(as.character(activityData$date))
 
 The activity data is at date and interval level. As we need the mean total number of steps per day, we have to sum up the steps at date level.  
 Let's create a new data frame which gives the total number of steps taken each day. For this purpose, let's not consider records with steps=NA.
-```{r}
+
+```r
 activitySummary<-as.data.frame(tapply(activityData$steps[which(is.na(activityData$steps)==FALSE)],
                                       activityData$dateEdt[which(is.na(activityData$steps)==FALSE)],sum))
 
@@ -26,23 +29,28 @@ colnames(activitySummary)[1] <- "TotalStepsTaken"
 activitySummary$date <- row.names(activitySummary)
 ```
 Now, we can plot the frequency distribution of number of steps in the form of a histogram.
-```{r, fig.width=6, fig.height6,fig.align='center'}
+
+```r
 hist(activitySummary$TotalStepsTaken,xlab="Steps taken each day",
      main="Histogram of Steps taken each day",col="blue")
 ```
 
+<img src="figure/fig.height6.png" title="plot of chunk fig.height6" alt="plot of chunk fig.height6" style="display: block; margin: auto;" />
+
 Getting the mean and median,
-```{r, results="asis"}
+
+```r
 meanSteps <- mean(activitySummary$TotalStepsTaken,na.rm=TRUE)
 
 medianSteps <- median(activitySummary$TotalStepsTaken,na.rm=TRUE)
 ```
-The mean number of steps taken each day is <b>*`r meanSteps`*</b> and the mdeian number of steps taken each day is <b>*`r medianSteps`*</b>. Both these values do not take into consideration the records with steps=NA.
+The mean number of steps taken each day is <b>*1.0766 &times; 10<sup>4</sup>*</b> and the mdeian number of steps taken each day is <b>*10765*</b>. Both these values do not take into consideration the records with steps=NA.
 
 ## What is the average daily activity pattern?
 
 To create a time series plot, we need a continuous date/time variable. Let's create that in first place.
-```{r,warning=FALSE}
+
+```r
 ##Creating a variable with hours and mins
 
 library(stringr)
@@ -57,11 +65,11 @@ library(lubridate)
 
 activityData$dateTime <- as.POSIXct(paste(as.character(activityData$dateEdt),
                                           activityData$interval_to_plot,sep=" "))
-
 ```
 
 Now, we need to summarize the steps taken at interval level across all days. We'll use mean function as we need to get the average steps taken during each interval.
-```{r}
+
+```r
 temp1 <- as.POSIXct(strptime((str_split_fixed(as.character(activityData$dateTime), " ", 2)[,2]),
                              "%H:%M:%S"))
 
@@ -75,7 +83,8 @@ activitySummary2$interval_to_plot <- row.names(activitySummary2)
 ```
 
 Plotting the time series to get the Average Daily Activity Pattern,
-```{r, fig.height=7,fig.width=12,fig.align='center'}
+
+```r
 ticks <- c("00:00","02:00","04:00","06:00","08:00","10:00","12:00","14:00",
            "16:00","18:00","20:00","22:00")
 
@@ -86,13 +95,16 @@ axis(1,at=as.POSIXct(activitySummary2$interval_to_plot)[which(substr(as.POSIXct(
      labels=ticks)
 ```
 
+<img src="figure/unnamed-chunk-7.png" title="plot of chunk unnamed-chunk-7" alt="plot of chunk unnamed-chunk-7" style="display: block; margin: auto;" />
+
 To identify the interval with the maximum average steps taken,
-```{r}
+
+```r
 time <- substr(activitySummary2$interval_to_plot[which(activitySummary2$AverageStepsTaken==max(activitySummary2$AverageStepsTaken))],12,16)
 
 interval <- as.numeric(paste(substr(time,1,2),substr(time,4,5),sep=""))
 ```
-The interval which has maximum average steps taken across all dates is <b>*`r interval-5` to `r interval`*</b>.
+The interval which has maximum average steps taken across all dates is <b>*830 to 835*</b>.
 
 ## Imputing missing values
 
@@ -100,14 +112,16 @@ There are a number of days/intervals where there are missing values
 (coded as NA). The presence of missing days may introduce bias into some
 calculations or summaries of the data.
 Let's first identify how many records have steps=NA.
-```{r}
+
+```r
 naCount <- sum(is.na(activityData$steps))
 ```
-<b>*`r naCount`*</b> records have steps=NA in activity data.
+<b>*2304*</b> records have steps=NA in activity data.
 
 As a background study, it has been found that there are days with all readings for steps=NA for all intervals. But for all intervals, atleast in onde day, we have data where steps<>NA. 
 So, we'll replace these missing values with the mean steps taken for that interval across all dates. We'll use the activitySummary2 data frame created earlier for this purpose.
-```{r}
+
+```r
 activitySummary2$interval_to_plot <- substr(activitySummary2$interval_to_plot,12,16)
 
 activityDataCleaned <- merge(activityData, activitySummary2, by="interval_to_plot", all.x=TRUE)
@@ -115,10 +129,10 @@ activityDataCleaned <- merge(activityData, activitySummary2, by="interval_to_plo
 activityDataCleaned$steps.Cleaned[which(is.na(activityDataCleaned$steps)==TRUE)] <- activityDataCleaned$AverageStepsTaken[which(is.na(activityDataCleaned$steps)==TRUE)]
 
 activityDataCleaned$steps.Cleaned[which(is.na(activityDataCleaned$steps)==FALSE)] <- activityDataCleaned$steps[which(is.na(activityDataCleaned$steps)==FALSE)]
-
 ```
 Let's summarize the cleaned data to get the total steps taken at each date level.
-```{r}
+
+```r
 activityCleanSummary<-as.data.frame(tapply(activityDataCleaned$steps.Cleaned,activityData$dateEdt,sum))
 
 colnames(activityCleanSummary)[1] <- "TotalStepsTaken"
@@ -128,17 +142,22 @@ activityCleanSummary$date <- row.names(activityCleanSummary)
 
 Now, let's plot the histogram of the steps taken using the cleaned data and find the mean and median.
 
-```{r,fig.align='center',fig.height=7,fig.width=6}
+
+```r
 ##plotting the histogram
 hist(activityCleanSummary$TotalStepsTaken,xlab="Steps taken each day",main="Histogram of Steps taken each day",col="blue")
+```
 
+<img src="figure/unnamed-chunk-12.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" />
+
+```r
 ##getting the mean and median
 meanCleanSteps <- mean(activityCleanSummary$TotalStepsTaken)
 
 medianCleanSteps <- median(activityCleanSummary$TotalStepsTaken)
 ```
 
-After data cleaning (i.e missing value treatment), the mean number of steps taken is <b>*`r meanCleanSteps`*</b> and the median is <b>*`r medianCleanSteps`*</b>. 
+After data cleaning (i.e missing value treatment), the mean number of steps taken is <b>*1.0766 &times; 10<sup>4</sup>*</b> and the median is <b>*1.0352 &times; 10<sup>4</sup>*</b>. 
 
 We observe that there is no change in th mean before and after cleaning because earlier we didn't consider NA records for calculation and now, we have replaced thwm with the mean for the correspoding intervals across all dates. 
 
@@ -153,12 +172,14 @@ Imputing missing data can change the pattern and hence the inference we draw, if
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Let's first create a new factor variable for weekdays/weekends
-```{r}
+
+```r
 activityDataCleaned$wday <- as.factor(ifelse(weekdays(activityDataCleaned$dateEdt,abbreviate=TRUE) %in% c("Sat","Sun"),"weekend","weekday"))
 ```
 
 Now, we need to aggregate the data at this factor and interval level to plot the Average Daily Activity pattern for weekdays and weekends separetly.
-```{r}
+
+```r
 temp3 <- as.POSIXct(strptime((str_split_fixed(as.character(activityDataCleaned$dateTime), " ", 2)[,2]), "%H:%M:%S"))
 
 activityCleanSummary2 <- as.data.frame(tapply(activityDataCleaned$steps.Cleaned,
@@ -169,7 +190,8 @@ activityCleanSummary2$interval_to_plot <- row.names(activityCleanSummary2)
 ```
 
 Plotting the AVerage Daily Activity Pattern using base plotting system,
-```{r, fig.height=10,fig.width=12,fig.align='center'}
+
+```r
 ticks <- c("00:00","02:00","04:00","06:00","08:00","10:00","12:00","14:00",
            "16:00","18:00","20:00","22:00")
 
@@ -186,8 +208,9 @@ plot(as.POSIXct(activityCleanSummary2$interval_to_plot),
 
 axis(1,at=as.POSIXct(activityCleanSummary2$interval_to_plot)[which(substr(as.POSIXct(activityCleanSummary2$interval_to_plot),12,16) %in% ticks)],
      labels=ticks)
-
 ```
+
+<img src="figure/unnamed-chunk-15.png" title="plot of chunk unnamed-chunk-15" alt="plot of chunk unnamed-chunk-15" style="display: block; margin: auto;" />
 On observing the plots, we can say that there is more activity during weekend than weekday. 
 
 During weekday, there is only one prominent peak at 8:30 but during weekend, peaks are at 8:30 and 9:00 in addition to other shoots up in steps taken at different time periods.
