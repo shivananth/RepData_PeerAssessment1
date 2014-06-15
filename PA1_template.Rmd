@@ -1,7 +1,15 @@
 # Reproducible Research: Peer Assessment 1
-
+This document contains the solution to the Peer Assessment 1 of Reproducible Research course with all the necessary code and figures.
 
 ## Loading and preprocessing the data
+Here's the code to read the csc file containinjg the activity data:
+```{r}
+activityData <- read.csv("C:/Users/GALAXY COMPUTERS/RepData_PeerAssessment1/activity/activity.csv")
+```
+Since the date variable is not of "date" type, let's coerce it.
+```{r}
+activityData$dateEdt <- as.Date(as.character(activityData$date))
+```
 
 
 
